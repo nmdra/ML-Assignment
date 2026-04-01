@@ -1,0 +1,10 @@
+Dataset source (original):
+UCI Machine Learning Repository - Predict students dropout and academic success
+https://archive.ics.uci.edu/dataset/697/predict+students+dropout+and+academic+success
+
+Local dataset file:
+- dataset.csv (comma-separated student dropout dataset used by the KNN notebook)
+
+Acquisition note:
+- Direct download from the UCI host was unavailable in this environment.
+- `dataset.csv` was retrieved from a public GitHub mirror of the same dataset schema/target.
