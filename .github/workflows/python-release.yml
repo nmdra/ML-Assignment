@@ -3,60 +3,81 @@ name: Python Release
 on:
   push:
     tags:
-      - "v*" # triggers on version tags like v1.0.0
+      - "v*"
 
 jobs:
-  release:
+  test:
+    name: Test
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
     defaults:
       run:
         working-directory: ./App
-
     steps:
-      # 1. Checkout code
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      # 2. Set up Python 3.12
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version-file: App/.python-version
 
-      # 3. Install uv with built-in caching
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
           cache-dependency-glob: App/uv.lock
 
-      # 4. Create virtual environment and sync dependencies
       - name: Install dependencies
         run: uv sync --frozen
 
-      # 5. Run tests
-      # - name: Run tests
-      # run: uv run pytest
+      - name: Run tests
+        run: uv run pytest --tb=short -q
 
-      # 6. Build release artifacts
+  release:
+    name: Build & Release
+    # needs: tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    defaults:
+      run:
+        working-directory: ./App
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: App/.python-version
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: App/uv.lock
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Verify version matches tag
+        run: |
+          PKG_VERSION=$(uv run python -c "import importlib.metadata; print(importlib.metadata.version('your-package-name'))")
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          if [ "$PKG_VERSION" != "$TAG_VERSION" ]; then
+          echo "Version mismatch: package=$PKG_VERSION tag=$TAG_VERSION"
+          exit 1
+          fi
+
       - name: Build release
         run: uv build
 
-      # 7. Upload release artifact
-      - name: Upload release artifact
+      - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: release-artifacts
           path: App/dist/
+          retention-days: 7
 
-      # 8. Create GitHub release
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
+          generate_release_notes: true
           files: App/dist/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
