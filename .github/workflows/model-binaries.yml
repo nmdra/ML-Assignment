@@ -5,12 +5,12 @@ on:
   push:
     branches:
       - main
-    tags:
-      - "v*"
     paths:
       - "KNN/KNN.ipynb"
       - "SVM/SVM.ipynb"
       - ".github/workflows/model-binaries.yml"
+  release:
+    types: [published]
 
 jobs:
   generate-models:
@@ -82,21 +82,34 @@ jobs:
       - name: Collect generated model binaries
         run: |
           mkdir -p model-binaries
-          cp KNN/saved_models/knn_model.pkl model-binaries/
-          cp SVM/saved_models/svm_model.pkl model-binaries/
+          mapfile -t KNN_MODELS < <(find KNN -type f -name 'knn_model.pkl')
+          mapfile -t SVM_MODELS < <(find SVM -type f -name 'svm_model.pkl')
+
+          if [ "${#KNN_MODELS[@]}" -ne 1 ]; then
+            echo "Error: Expected exactly 1 knn_model.pkl from KNN/KNN.ipynb, found ${#KNN_MODELS[@]}."
+            exit 1
+          fi
+
+          if [ "${#SVM_MODELS[@]}" -ne 1 ]; then
+            echo "Error: Expected exactly 1 svm_model.pkl from SVM/SVM.ipynb, found ${#SVM_MODELS[@]}."
+            exit 1
+          fi
+
+          cp "${KNN_MODELS[0]}" model-binaries/knn_model.pkl
+          cp "${SVM_MODELS[0]}" model-binaries/svm_model.pkl
 
       - name: Upload model binaries artifact
         uses: actions/upload-artifact@v4
         with:
           name: model-binaries
           path: model-binaries/*.pkl
-          retention-days: 7
+          retention-days: 30
 
       - name: Attach model binaries to GitHub release
-        if: startsWith(github.ref, 'refs/tags/')
+        if: github.event_name == 'release'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
+          tag_name: ${{ github.event.release.tag_name }}
           files: model-binaries/*.pkl
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

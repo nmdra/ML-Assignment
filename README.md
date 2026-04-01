@@ -30,9 +30,9 @@ Quick start:
 ## GitHub Action: model binaries from notebooks
 The workflow `.github/workflows/model-binaries.yml` executes `KNN/KNN.ipynb` and `SVM/SVM.ipynb` in CI and publishes generated model binaries:
 - Uploads `knn_model.pkl` and `svm_model.pkl` as a workflow artifact named `model-binaries`
-- On tag pushes (`v*`), also attaches both `.pkl` files to the GitHub Release
+- On published releases, also attaches both `.pkl` files to the GitHub Release
 
 Triggers:
 - Manual run (`workflow_dispatch`)
 - Pushes to `main` that change `KNN/KNN.ipynb`, `SVM/SVM.ipynb`, or the workflow file
-- Tag pushes matching `v*` (for release asset publishing)
+- Published release events (for release asset publishing)
