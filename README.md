@@ -14,6 +14,15 @@ UCI ML Repository: *Predict students dropout and academic success* (ID 697), wit
 - SMOTE comparison for class-imbalance analysis
 
 ## How to Run
-1. Open `knn/KNN.ipynb` or `SVM/SVM.ipynb` in Jupyter.
+1. Open `KNN/KNN.ipynb` or `SVM/SVM.ipynb` in Jupyter.
 2. Install notebook dependencies (`ucimlrepo`, `imbalanced-learn`, `scikit-learn`).
 3. Run all cells to reproduce metrics and figures.
+
+## App
+This repository includes a Streamlit app in `App/` for interactive student outcome prediction with trained KNN and SVM model bundles.
+
+Quick start:
+1. `cd App`
+2. Install dependencies from `requirements.txt`.
+3. Run `streamlit run main.py`.
+4. Upload your trained `.pkl` model files (KNN and/or SVM) from the sidebar.
