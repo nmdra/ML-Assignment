@@ -1,0 +1,115 @@
+name: Generate Model Binaries
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "KNN/KNN.ipynb"
+      - "SVM/SVM.ipynb"
+      - ".github/workflows/model-binaries.yml"
+  release:
+    types: [published]
+
+jobs:
+  generate-models:
+    name: Generate .pkl Models From Notebooks
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install notebook dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install \
+            jupyter \
+            nbformat \
+            nbconvert \
+            nbclient \
+            numpy \
+            pandas \
+            scikit-learn \
+            imbalanced-learn \
+            ucimlrepo \
+            matplotlib \
+            seaborn
+
+      - name: Prepare notebooks for CI execution
+        run: |
+          python - <<'PY'
+          import nbformat
+          from pathlib import Path
+
+          NOTEBOOKS = [
+              Path("KNN/KNN.ipynb"),
+              Path("SVM/SVM.ipynb"),
+          ]
+
+          for nb_path in NOTEBOOKS:
+              nb = nbformat.read(nb_path, as_version=4)
+              cleaned_cells = []
+              for cell in nb.cells:
+                  if cell.get("cell_type") != "code":
+                      cleaned_cells.append(cell)
+                      continue
+                  source = cell.get("source", "")
+                  if "from google.colab import files" in source:
+                      continue
+                  if "files.download(" in source:
+                      continue
+                  cleaned_cells.append(cell)
+              nb.cells = cleaned_cells
+              sanitized_path = nb_path.with_name(nb_path.stem + ".ci.ipynb")
+              nbformat.write(nb, sanitized_path)
+              print(f"Prepared {sanitized_path}")
+          PY
+
+      - name: Execute KNN notebook
+        working-directory: KNN
+        run: jupyter nbconvert --to notebook --execute KNN.ci.ipynb --output KNN.executed.ipynb
+
+      - name: Execute SVM notebook
+        working-directory: SVM
+        run: jupyter nbconvert --to notebook --execute SVM.ci.ipynb --output SVM.executed.ipynb
+
+      - name: Collect generated model binaries
+        run: |
+          mkdir -p model-binaries
+          mapfile -t KNN_MODELS < <(find KNN -type f -name 'knn_model.pkl')
+          mapfile -t SVM_MODELS < <(find SVM -type f -name 'svm_model.pkl')
+
+          if [ "${#KNN_MODELS[@]}" -ne 1 ]; then
+            echo "Error: Expected exactly 1 knn_model.pkl from KNN/KNN.ipynb, found ${#KNN_MODELS[@]}."
+            exit 1
+          fi
+
+          if [ "${#SVM_MODELS[@]}" -ne 1 ]; then
+            echo "Error: Expected exactly 1 svm_model.pkl from SVM/SVM.ipynb, found ${#SVM_MODELS[@]}."
+            exit 1
+          fi
+
+          cp "${KNN_MODELS[0]}" model-binaries/knn_model.pkl
+          cp "${SVM_MODELS[0]}" model-binaries/svm_model.pkl
+
+      - name: Upload model binaries artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: model-binaries
+          path: model-binaries/*.pkl
+          retention-days: 30
+
+      - name: Attach model binaries to GitHub release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.release.tag_name }}
+          files: model-binaries/*.pkl
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
