@@ -11,6 +11,10 @@ jobs:
     permissions:
       contents: write
 
+    defaults:
+      run:
+        working-directory: ./App
+
     steps:
     # 1. Checkout code
     - name: Checkout code
@@ -18,45 +22,41 @@ jobs:
 
     # 2. Set up Python 3.12
     - name: Set up Python 3.12
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
-        python-version: 3.12
+        python-version-file: App/.python-version
 
-    # 3. Install `uv` CLI
+    # 3. Install uv with built-in caching
     - name: Install uv
-      run: |
-        python -m pip install --upgrade pip
-        pip install uv
+      uses: astral-sh/setup-uv@v5
+      with:
+        enable-cache: true
+        cache-dependency-glob: App/uv.lock
 
-    # 4. Enable uv cache
-    - name: Enable uv cache
-      run: echo "UV_CACHE=1" >> $GITHUB_ENV
+    # 4. Create virtual environment and sync dependencies
+    - name: Install dependencies
+      run: uv sync --frozen
 
-    # 5. Create virtual environment with uv
-    - name: Setup uv venv
-      run: |
-        uv venv --python=python3.12
-        uv sync
-
-    # 6. Run tests (optional, but recommended)
+    # 5. Run tests
     - name: Run tests
       run: uv run pytest
 
-    # 7. Build release artifacts
+    # 6. Build release artifacts
     - name: Build release
       run: uv build
 
-    # 8. Upload release artifact
+    # 7. Upload release artifact
     - name: Upload release artifact
       uses: actions/upload-artifact@v4
       with:
         name: release-artifacts
-        path: dist/  # adjust if uv outputs elsewhere
+        path: App/dist/
 
-    # 9. (Optional) Create GitHub release
+    # 8. Create GitHub release
     - name: Create GitHub release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
         tag_name: ${{ github.ref_name }}
+        files: App/dist/*
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
