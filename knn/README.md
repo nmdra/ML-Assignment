@@ -1,4 +1,4 @@
-# KNN Module
+# KNN Analysis
 This notebook trains and evaluates a K-Nearest Neighbors classifier for student outcome prediction (Dropout/Enrolled/Graduate).
 
 ## What KNN Does Here
