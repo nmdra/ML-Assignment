@@ -5,7 +5,7 @@ import pandas as pd
 
 # ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="Student Outcome Predictor",
+    page_title="Academic-Success-Predictor",
     page_icon="🎓",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -453,7 +453,7 @@ with st.sidebar:
 st.markdown("""
 <div class='hero-wrap'>
   <p class='hero-eyebrow'>ML · Classification · 3-class</p>
-  <p class='hero-title'>Student Outcome Predictor</p>
+  <p class='hero-title'>Academic-Success-Predictor</p>
   <p class='hero-sub'>Predict dropout risk using trained KNN &amp; SVM models — UCI dataset, 4,424 students</p>
 </div>
 """, unsafe_allow_html=True)
