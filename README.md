@@ -1,8 +1,8 @@
-# ML Assignment — Student Outcome Prediction
+# Academic-Success-Predictor
 
 This project predicts student academic outcomes (**Dropout**, **Enrolled**, **Graduate**) using machine learning models trained on academic and demographic data.
 
-<img width="1835" height="982" alt="Screenshot 2026-04-02 at 08-08-32 Student Outcome Predictor" src="https://github.com/user-attachments/assets/6c8d9112-32f7-45d0-aad0-a102de650b95" />
+<img width="1835" height="982" alt="Screenshot 2026-04-02 at 08-08-32 Academic-Success-Predictor" src="https://github.com/user-attachments/assets/6c8d9112-32f7-45d0-aad0-a102de650b95" />
 
 
 
@@ -39,7 +39,7 @@ Target classes:
 ## 3) Repository Structure
 
 ```text
-ML-Assignment/
+Academic-Success-Predictor/
 ├── App/
 │   ├── main.py
 │   ├── README.md
