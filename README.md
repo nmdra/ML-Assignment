@@ -9,15 +9,17 @@ This project predicts student academic outcomes (**Dropout**, **Enrolled**, **Gr
 It includes:
 - A full **KNN pipeline** (`KNN/KNN.ipynb`)
 - A full **SVM pipeline** (`SVM/SVM.ipynb`)
+- A full **Naive Bayes pipeline** (`NaiveBayes/NaiveBayes.ipynb`)
 - A **Streamlit app** for interactive predictions (`App/main.py`)
 
 ---
 
 ## 1) Project Objective
 
-Build and compare two multiclass classifiers to estimate student outcomes:
+Build and compare three multiclass classifiers to estimate student outcomes:
 - **K-Nearest Neighbors (KNN)**
 - **Support Vector Machine (SVM)**
+- **Naive Bayes (Gaussian NB)**
 
 Then expose model predictions through a simple web UI for easier demonstration and analysis.
 
@@ -51,6 +53,9 @@ Academic-Success-Predictor/
 ├── SVM/
 │   ├── SVM.ipynb
 │   └── README.md
+├── NaiveBayes/
+│   ├── NaiveBayes.ipynb
+│   └── README.md
 ├── data/
 ├── figures/
 ├── SECURITY.md
@@ -73,6 +78,11 @@ Academic-Success-Predictor/
 - Baseline evaluation and SMOTE comparison
 - `class_weight='balanced'` for class imbalance handling
 
+### Naive Bayes workflow
+- Preprocessing (including imputation and scaling)
+- `var_smoothing` tuning via stratified 5-fold cross-validation
+- Baseline evaluation and SMOTE comparison
+
 ---
 
 ## 5) Trained Model Files
@@ -81,6 +91,7 @@ Each notebook exports a model bundle (`.pkl`) that includes preprocessing object
 
 - KNN output: `KNN/saved_models/knn_model.pkl`
 - SVM output: `SVM/saved_models/svm_model.pkl`
+- Naive Bayes output: `NaiveBayes/saved_models/nb_model.pkl`
 
 These `.pkl` files are used directly by the Streamlit app.
 
@@ -91,6 +102,7 @@ These `.pkl` files are used directly by the Streamlit app.
 1. Open one notebook:
    - `KNN/KNN.ipynb`
    - `SVM/SVM.ipynb`
+   - `NaiveBayes/NaiveBayes.ipynb`
 2. Install required Python packages (examples):
    - `scikit-learn`
    - `imbalanced-learn`
@@ -140,4 +152,5 @@ If both models are uploaded, the app displays both predictions and agreement sta
 
 - KNN details: `KNN/README.md`
 - SVM details: `SVM/README.md`
+- Naive Bayes details: `NaiveBayes/README.md`
 - App usage: `App/README.md`
